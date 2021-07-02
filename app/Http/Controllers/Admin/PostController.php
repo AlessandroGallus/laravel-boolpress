@@ -1,10 +1,10 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 use App\Post;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\PostRequest;
 
 class PostController extends Controller
 {
@@ -35,14 +35,36 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(PostRequest $request)
     {
-        $data = $request->all();
+        /* $data = $request->all();
         $data['slug'] = Str::slug($data['title'], '-');
         $new_post = new Post();
         $new_post->fill($data);
         $new_post->save();
-        return redirect()->route('admin.posts.show',$new_post);
+        return redirect()->route('admin.posts.show',$new_post); */
+
+        $data = $request->all();
+        $data['slug'] = Str::slug($data['title'], '-'); //completare e verificare//
+
+        $slug_exist = Post::where('slug', $data['slug'])->first();
+        $counter= 0;
+        while($slug_exist){
+          $title = $data['title'] . '-' . $counter;
+          $slug = Str::slug($title, '-');
+          $data['slug'] = $slug;
+          $slug_exist = Post::where('slug', $data['slug'])->first();
+          $couinter++;
+        }
+        
+        $new_post = new post;
+        $new_post->fill($data);
+        $new_post->save();
+
+        return redirect()->route('admin.posts.show', $new_post);
+
+
+
     }
 
     /**
