@@ -13,8 +13,9 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Category</th>
                 <th>Title</th>
+                <th>Categoria</th>
+                <th>Tag</th>
                 <th colspan="3">Actions</th>
             </tr>
         </thead>
@@ -22,6 +23,7 @@
             @foreach ($posts as $post)
                 <tr>
                     <td>{{ $post->id }}</td>
+                    <td>{{ $post->title }}</td>
                     <td>
                         @if ($post->category)
                             {{ $post->category->name }}
@@ -29,9 +31,15 @@
                             -
                         @endif
                     </td>
-                    <td>{{ $post->title }}</td>
                     <td>
-                      <a class="btn btn-primary" href="{{ route('admin.posts.show', $post) }}">SHOW</a>
+                        @forelse ($post->tags as $tag)
+                            <span class="badge badge-primary">{{ $tag->name }}</span>
+                        @empty
+                            -
+                        @endforelse
+                    </td>
+                    <td>
+                        <a class="btn btn-primary" href="{{ route('admin.posts.show', $post) }}">SHOW</a>
                     </td>
                     <td>
                         <a class="btn btn-info" href="{{ route('admin.posts.edit', $post) }}">EDIT</a>
@@ -47,5 +55,18 @@
             @endforeach
         </tbody>
     </table>
+
+    @foreach($categories as $category)
+        <h3>{{ $category->name }}</h3>
+        <ul>
+            @forelse ($category->posts as $post_category)
+                {{-- qui viene stampato quello che trovo --}}
+                <li>{{ $post_category->title }}</li>
+            @empty
+                {{-- se non trovo nulla stampo quello che metto qui --}}
+                <li>nessun post presente</li>
+            @endforelse
+        </ul>
+    @endforeach
 </div>
 @endsection

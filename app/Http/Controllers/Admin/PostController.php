@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Admin;
 use App\Post;
+use App\Tag;
 use Illuminate\Support\Str;
 use App\Category;
 use App\Http\Controllers\Controller;
@@ -17,7 +18,8 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::All();
-        return view('admin.posts.index', compact('posts'));
+        $categories = Category::all();
+        return view('admin.posts.index', compact('posts','categories'));
     }
 
     /**
@@ -28,7 +30,8 @@ class PostController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('admin.posts.create', compact('categories'));
+        $tags = Tag::all();
+        return view('admin.posts.create', compact('categories','tags'));
     }
 
     /**
@@ -62,7 +65,10 @@ class PostController extends Controller
         $new_post = new post;
         $new_post->fill($data);
         $new_post->save();
-
+        if(array_key_exists('tags',$data)){
+            //popolo la tabella pivot con la chiave del post e le chivi dei tags
+            $new_post->tags()->attach($data['tags']);
+        }
         return redirect()->route('admin.posts.show', $new_post);
 
 
@@ -92,11 +98,13 @@ class PostController extends Controller
     public function edit($id)
     {
         $post = Post::find($id);
+        $tags = Tag::all();
         $categories = Category::all();
+
         if(!$post){
             abort(404);
         }
-        return view('admin.posts.edit', compact('post','categories'));
+        return view('admin.posts.edit', compact('post','categories','tags'));
     }
 
     /**
@@ -109,8 +117,32 @@ class PostController extends Controller
     public function update(Request $request, Post $post)
     {
         $data = $request->all();
-        $data['slug'] = Str::slug($post->title, '-');
+
+        if($post->title !== $data['title']){
+
+            $slug = Str::slug($data['title'], '-');
+            $slug_exist = Post::where('slug',$slug)->first();
+            $counter = 0;
+            while($slug_exist){
+                $title = $data['title'] . '-' . $counter;
+                $slug = Str::slug($title, '-');
+                $data['slug']  = $slug;
+                $slug_exist = Post::where('slug',$slug)->first();
+                $counter++;
+            }
+
+        }else{
+            $data['slug'] = $post->slug;
+        }
+
         $post->update($data);
+
+        if(array_key_exists('tags',$data)){
+            $post->tags()->sync($data['tags']);
+        }else{
+            $post->tags()->detach();
+        }
+
         return redirect()->route('admin.posts.show',$post);
     }
 

@@ -16,4 +16,8 @@ class Post extends Model
         // mi restituisce una singola entità
         return $this->belongsTo('App\Category');
     }
+    public function tags(){
+        // mi restituisce una singola entità
+        return $this->belongsToMany('App\Tag');
+    }
 }
