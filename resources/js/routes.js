@@ -8,6 +8,7 @@ import Home  from './pages/Home.vue';
 import About  from './pages/About.vue';
 import Blog  from './pages/Blog.vue';
 import Contact  from './pages/Contact.vue';
+import PostDetail from './pages/PostDetail.vue'
 import Error404  from './pages/Error404.vue';
 
 const router = new VueRouter({
@@ -33,6 +34,11 @@ const router = new VueRouter({
             path: '/contacts',
             name: 'contacts',
             component: Contact
+        },
+        {
+            path: '/detail/:slug',
+            name: 'detail',
+            component: PostDetail
         },
         {
             path: '/*',
